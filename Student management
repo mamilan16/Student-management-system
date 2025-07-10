@@ -1,0 +1,239 @@
+
+#include <iostream>
+using namespace std;
+
+const int MAX = 2000;
+
+struct Student {
+    int id, year, semester, courseCount;
+    char name[50];
+    float phone, grades[7], gpas[7], averageGPA, totalGrade;
+    string courseNames[7];
+};
+
+Student students[MAX];
+int studentCount = 0;
+
+float convertToGPA(float grade) {
+    if (grade >= 90) return 4.0;
+    else if (grade >= 80) return 3.0 + (grade - 80) * 0.1;
+    else if (grade >= 70) return 2.0 + (grade - 70) * 0.1;
+    else if (grade >= 60) return 1.0 + (grade - 60) * 0.1;
+    else return 0.0;
+}
+
+string getCourseName(int year, int semester, int index) {
+    if (year == 1) {
+        string courses[] = {
+            "Communicative English Language Skill I",
+            "Moral and Civic Education",
+            "Social Anthropology",
+            "Mathematics for Natural Science",
+            "Introduction to Computing Science",
+            "General Psychology"
+        };
+        return (index < 6) ? courses[index] : "Unknown";
+    }
+    if (year == 2) {
+        if (semester == 1) {
+            string courses[] = {
+                "Programming Fundamentals II",
+                "Physical Fitness",
+                "Entrepreneurship and Business Development",
+                "Data Communication and Computer Networks",
+                "Digital Electronics and Logic Design",
+                "Introduction to Linear Algebra",
+                "Computer Architecture and Organization"
+            };
+            return (index < 7) ? courses[index] : "Unknown";
+        } else {
+            string courses[] = {
+                "Introduction to Statistics and Probability Theory",
+                "Network and System Administration",
+                "Object Oriented Programming",
+                "Fundamentals of Database Systems",
+                "Data Structure and Algorithm Analysis",
+                "Advanced Database Systems"
+            };
+            return (index < 6) ? courses[index] : "Unknown";
+        }
+    }
+    if (year == 3) {
+        string courses[] = {
+            "Compiler Design",
+            "Computer and Network Security",
+            "Machine Organization and Assembly Language",
+            "Internet Programming I",
+            "Research Methods in Computer Science",
+            "Discrete Mathematics and Combinatorics"
+        };
+        return (index < 6) ? courses[index] : "Unknown";
+    }
+    if (year == 4) {
+        if (semester == 1) {
+            string courses[] = {
+                "Internet Programming I",
+                "Research Methods in Computer Science",
+                "Discrete Mathematics and Combinatorics",
+                "Introduction to Artificial Intelligence",
+                "Introduction to Statistics and Probability Theory",
+                "Network and System Administration"
+            };
+            return (index < 6) ? courses[index] : "Unknown";
+        } else {
+            string courses[] = {
+                "Object Oriented Programming",
+                "Internet Programming II",
+                "Computer Graphics",
+                "Compiler Design",
+                "Computer and Network Security",
+                "Machine Organization and Assembly Language"
+            };
+            return (index < 6) ? courses[index] : "Unknown";
+        }
+    }
+    return "Unknown";
+}
+
+void addStudent() {
+    if (studentCount >= MAX) {
+        cout << "Maximum student limit reached.\n";
+        return;
+    }
+
+    cout << "Enter ID: ";
+    cin >> students[studentCount].id;
+    cin.ignore();
+    cout << "Enter Full Name: ";
+    cin.getline(students[studentCount].name, 50);
+    cout << "Enter Phone Number: ";
+    cin >> students[studentCount].phone;
+    cout << "Enter Year (1-4): ";
+    cin >> students[studentCount].year;
+    cout << "Enter Semester (1 or 2): ";
+    cin >> students[studentCount].semester;
+
+    int courseCount = (students[studentCount].year == 2 && students[studentCount].semester == 1) ? 7 : 6;
+    students[studentCount].courseCount = courseCount;
+
+    float gradeSum = 0.0, gpaSum = 0.0;
+
+    cout << "\nEnter grades (0–100) for the following courses:\n";
+    for (int i = 0; i < courseCount; ++i) {
+        string course = getCourseName(students[studentCount].year, students[studentCount].semester, i);
+        students[studentCount].courseNames[i] = course;
+        cout << course << ": ";
+        cin >> students[studentCount].grades[i];
+        students[studentCount].gpas[i] = convertToGPA(students[studentCount].grades[i]);
+        gradeSum += students[studentCount].grades[i];
+        gpaSum += students[studentCount].gpas[i];
+    }
+
+    students[studentCount].totalGrade = gradeSum;
+    students[studentCount].averageGPA = gpaSum / courseCount;
+
+    cout << "\nStudent added successfully.\n";
+    studentCount++;
+}
+
+void update(int id) {
+    for (int i = 0; i < studentCount; ++i) {
+        if (students[i].id == id) {
+            cout << "1. ID\n2. Name\n3. Year\n4. Semester\n5. Phone\n6. Total Grade\n7. One Course Grade\n";
+            cout << "Enter choice to update: ";
+            int choice;
+            cin >> choice;
+            switch (choice) {
+                case 1: cout << "New ID: "; cin >> students[i].id; break;
+                case 2: cout << "New Name: "; cin.ignore(); cin.getline(students[i].name, 50); break;
+                case 3: cout << "New Year: "; cin >> students[i].year; break;
+                case 4: cout << "New Semester: "; cin >> students[i].semester; break;
+                case 5: cout << "New Phone: "; cin >> students[i].phone; break;
+                case 6: cout << "Update Total Grade: "; cin >> students[i].totalGrade; break;
+                case 7: {
+                    int index;
+                    cout << "Enter course index (0 to " << students[i].courseCount - 1 << "): ";
+                    cin >> index;
+                    if (index >= 0 && index < students[i].courseCount) {
+                        cout << "New grade for " << students[i].courseNames[index] << ": ";
+                        cin >> students[i].grades[index];
+                        students[i].gpas[index] = convertToGPA(students[i].grades[index]);
+
+                        // Update total and average
+                        float total = 0, gpaTotal = 0;
+                        for (int j = 0; j < students[i].courseCount; ++j) {
+                            total += students[i].grades[j];
+                            gpaTotal += students[i].gpas[j];
+                        }
+                        students[i].totalGrade = total;
+                        students[i].averageGPA = gpaTotal / students[i].courseCount;
+                    } else {
+                        cout << "Invalid index!\n";
+                    }
+                    break;
+                }
+                default: cout << "Invalid choice.\n"; return;
+            }
+            cout << "Student record updated.\n";
+            return;
+        }
+    }
+    cout << "Student not found.\n";
+}
+
+void searchStudent(int id) {
+    for (int i = 0; i < studentCount; ++i) {
+        if (students[i].id == id) {
+            cout << "\n===== Student Record =====\n";
+            cout << "ID: " << students[i].id << endl;
+            cout << "Name: " << students[i].name << endl;
+            cout << "Phone: " << students[i].phone << endl;
+            cout << "Year: " << students[i].year << " Semester: " << students[i].semester << endl;
+            cout << "\n-- Course Performance --\n";
+            cout << "Course                          Grade   GPA\n";
+            for (int j = 0; j < students[i].courseCount; ++j) {
+                cout << students[i].courseNames[j] << "\n    "
+                     << students[i].grades[j] << "      " << students[i].gpas[j] << endl;
+            }
+            cout << "\nTotal Grade: " << students[i].totalGrade << endl;
+            cout << "Average GPA: " << students[i].averageGPA << endl;
+            return;
+        }
+    }
+    cout << "Student not found.\n";
+}
+
+int main() {
+    int choice;
+    do {
+        cout << "\n==== St. Mary University Student System ====\n";
+        cout << "1. Add Student Record\n";
+        cout << "2. Update Student Record\n";
+        cout << "3. Search Student\n";
+        cout << "4. Exit\n";
+        cout << "Enter choice: ";
+        cin >> choice;
+
+        if (choice == 1) addStudent();
+        else if (choice == 2) {
+            int id;
+            cout << "Enter ID to update: ";
+            cin >> id;
+            update(id);
+        } else if (choice == 3) {
+            int id;
+            cout << "Enter ID to search: ";
+            cin >> id;
+            searchStudent(id);
+        } else if (choice == 4) {
+            cout << "Goodbye!\n";
+        } else {
+            cout << "Invalid choice. Try again.\n";
+        }
+    } while (choice != 4);
+
+    return 0;
+}
+
+
+    
