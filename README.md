@@ -1,3 +1,0 @@
-//# Student-management
-
-//A c++ program to manage student records
